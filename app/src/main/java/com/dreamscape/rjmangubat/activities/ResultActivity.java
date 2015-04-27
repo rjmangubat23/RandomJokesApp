@@ -26,6 +26,7 @@ public class ResultActivity extends ActionBarActivity {
 
     private void initComponents(){
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("");
         tvResult = (TextView)findViewById(R.id.tvResult);
     }
 

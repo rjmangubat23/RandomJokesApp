@@ -7,11 +7,24 @@
     tools:context="com.dreamscape.rjmangubat.activities.ResultActivity">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="25sp"
+        android:text="Jokes to brighten your day:"
+        android:id="@+id/tvTitle"
+        android:layout_above="@+id/tvResult"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp" />
+    <TextView
         android:id="@+id/tvResult"
+        android:textSize="18sp"
         android:text="@string/hello_world"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
+
+
 
 </RelativeLayout>

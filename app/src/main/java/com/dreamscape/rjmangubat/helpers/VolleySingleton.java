@@ -13,12 +13,11 @@ public class VolleySingleton {
 
     private static VolleySingleton instance;
     private RequestQueue requestQueue;
-
+    private Context context;
 
     private VolleySingleton(Context context) {
         requestQueue = Volley.newRequestQueue(context);
     }
-
 
     public static VolleySingleton getInstance(Context context) {
         if (instance == null) {
@@ -28,6 +27,9 @@ public class VolleySingleton {
     }
 
     public RequestQueue getRequestQueue() {
+        if(requestQueue == null){
+            requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+        }
         return requestQueue;
     }
 
