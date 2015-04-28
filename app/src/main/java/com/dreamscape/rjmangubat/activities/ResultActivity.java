@@ -13,7 +13,6 @@ import com.dreamscape.rjmangubat.helpers.Jokes;
 public class ResultActivity extends ActionBarActivity {
 
     private TextView tvResult;
-    private Intent resultIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +30,10 @@ public class ResultActivity extends ActionBarActivity {
     }
 
     private void displayJokes(){
-        resultIntent = getIntent();
+        Intent resultIntent = getIntent();
         Jokes currentJoke = (Jokes) resultIntent.getSerializableExtra("joke");
-
         tvResult.setText(currentJoke.getJoke());
+
 
 
     }
@@ -52,10 +51,12 @@ public class ResultActivity extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
+                this.finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
 }

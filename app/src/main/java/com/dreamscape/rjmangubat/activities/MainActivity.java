@@ -1,7 +1,7 @@
 package com.dreamscape.rjmangubat.activities;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -28,16 +27,18 @@ public class MainActivity extends ActionBarActivity {
 
     private final String API_URL = "http://api.icndb.com/jokes/random";
     private Jokes mJoke;
-    private String mResult,
+    private String mResult = "",
                    mFirstName,
-                   mLastName;
+                   mLastName,
+                   mCategoryChosen;
     private Intent intent;
     private View v;
     private EditText etFirstName,
                      etLastName;
     private JSONObject mResponse;
     private ParseObject parseObject;
-    private RequestQueue mQueue;
+    protected ProgressDialog progressBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,19 +52,25 @@ public class MainActivity extends ActionBarActivity {
 
     private void initComponents(){
 
-        mQueue = VolleySingleton.getInstance(this).getRequestQueue();
         parseObject = new ParseObject();
         mJoke = new Jokes();
+
+        progressBar = new ProgressDialog(this);
+
+        progressBar.setIndeterminate(true);
+        progressBar.setMessage("Loading picture...");
+        progressBar.setCancelable(true);
+        progressBar.setCanceledOnTouchOutside(true);
 
     }
 
     private void RequestData(String url){
-
         JsonObjectRequest request = new JsonObjectRequest(url, null,
                 new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
+                        progressBar.show();
                         mResponse = response;
                         Gson gson = new Gson();
                         parseObject = gson.fromJson(mResponse.toString(),ParseObject.class);
@@ -77,8 +84,9 @@ public class MainActivity extends ActionBarActivity {
                         else {
                             Toast.makeText(getApplicationContext(), "Response failed!", Toast.LENGTH_SHORT).show();
                         }
-
+                        progressBar.dismiss();
                     }
+
                 },
 
                 new Response.ErrorListener() {
@@ -89,7 +97,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                 }
         );
-        mQueue.add(request);
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
     }
 
     public void onClick(View v){
@@ -98,27 +106,31 @@ public class MainActivity extends ActionBarActivity {
             case R.id.btnRandomJoke:
 
                 RequestData(API_URL);
+
                 mJoke.setJoke(mResult);
 
                 intent = new Intent(this, ResultActivity.class);
                 intent.putExtra("joke", mJoke);
                 startActivity(intent);
+                Toast.makeText(this, mResult, Toast.LENGTH_SHORT).show();
 
                 break;
             case R.id.btnNameJoke:
-                messageDialog(this);
+                messageNameDialog();
+                Toast.makeText(this, mResult, Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btnCategoryJoke:
-
+                messageCategoryDialog();
                 Toast.makeText(this, mResult, Toast.LENGTH_SHORT).show();
             default:
                 break;
         }
 
+
     }
 
-    public void messageDialog(Activity activity){
-        LayoutInflater inflater = LayoutInflater.from(activity);
+    protected void messageNameDialog(){
+        LayoutInflater inflater = LayoutInflater.from(this);
         v = inflater.inflate(R.layout.name_dialog, null);
 
         new AlertDialog.Builder(this)
@@ -141,14 +153,52 @@ public class MainActivity extends ActionBarActivity {
                         intent.putExtra("joke", mJoke);
                         startActivity(intent);
                         //msg = "result: "  + etLastName.getText().toString().trim() + etFirstName.getText().toString().trim();
-
-                        // Toast.makeText(getApplicationContext(), msg , Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(getApplicationContext(), msg , Toast.LENGTH_SHORT).show();
 
                     }
                 })
-                .show();
+        .show();
     }
 
+    protected void messageCategoryDialog(){
 
+        final CharSequence[] items = {"Explicit", "Nerdy"};
+
+        new AlertDialog.Builder(this)
+            .setTitle("Select The Difficulty Level")
+            .setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+
+
+                    switch (item) {
+                        case 0:
+                            mCategoryChosen = "explicit";
+                            break;
+                        case 1:
+                            // Your code when 2nd  option seletced
+                            mCategoryChosen = "nerdy";
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            }).setNegativeButton("Go", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    RequestData(API_URL+"?limitTo=["+mCategoryChosen+"]");
+
+                    mJoke.setJoke(mResult);
+
+                    intent = new Intent(getApplicationContext(), ResultActivity.class);
+                    intent.putExtra("joke", mJoke);
+                    startActivity(intent);
+                    Toast.makeText(getApplicationContext(), API_URL+"?limitTo=["+mCategoryChosen+"]" , Toast.LENGTH_SHORT).show();
+
+                    dialog.dismiss();
+            }
+        }).show();
+
+
+    }
 
 }
