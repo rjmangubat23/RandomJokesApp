@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -29,7 +30,11 @@ public class MainActivity extends ActionBarActivity {
     private Jokes mJoke;
     private String mResult,
                    mFirstName,
-                   mLastname;
+                   mLastName;
+    private Intent intent;
+    private View v;
+    private EditText etFirstName,
+                     etLastName;
     private JSONObject mResponse;
     private ParseObject parseObject;
     private RequestQueue mQueue;
@@ -92,12 +97,12 @@ public class MainActivity extends ActionBarActivity {
         switch(v.getId()){
             case R.id.btnRandomJoke:
 
-                    RequestData(API_URL);
-                    mJoke.setJoke(mResult);
+                RequestData(API_URL);
+                mJoke.setJoke(mResult);
 
-                Intent intent = new Intent(this, ResultActivity.class);
-                    intent.putExtra("joke", mJoke);
-                    startActivity(intent);
+                intent = new Intent(this, ResultActivity.class);
+                intent.putExtra("joke", mJoke);
+                startActivity(intent);
 
                 break;
             case R.id.btnNameJoke:
@@ -112,33 +117,36 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-    protected void messageDialog(Activity activity){
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Enter your Name");
-        final EditText etFirstName = new EditText(activity);
-        alert.setMessage("First Name:");
-        final EditText etLastName = new EditText(activity);
-        alert.setMessage("Last Name:");
+    public void messageDialog(Activity activity){
+        LayoutInflater inflater = LayoutInflater.from(activity);
+        v = inflater.inflate(R.layout.name_dialog, null);
 
-        alert.setView(etFirstName);
-        alert.setView(etLastName);
+        new AlertDialog.Builder(this)
+                .setView(v)
+                .setTitle("Enter your Name:")
+                .setNegativeButton("Go", new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id){
+                        etFirstName = (EditText) v.findViewById(R.id.etFirstName);
+                        etLastName = (EditText) v.findViewById(R.id.etLastName);
 
-        alert.setPositiveButton("Go", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //What ever you want to do with the value
-                mFirstName = etFirstName.getText().toString();
+                        mFirstName = etFirstName.getText().toString().trim();
+                        mLastName = etLastName.getText().toString().trim();
 
 
-            }
-        });
+                        RequestData(API_URL+"?firstName="+mFirstName+"&lastName="+mLastName);
 
-        /*alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                // what ever you want to do with No option.
-            }
-        });*/
+                        mJoke.setJoke(mResult);
 
-        alert.show();
+                        intent = new Intent(getApplicationContext(), ResultActivity.class);
+                        intent.putExtra("joke", mJoke);
+                        startActivity(intent);
+                        //msg = "result: "  + etLastName.getText().toString().trim() + etFirstName.getText().toString().trim();
+
+                        // Toast.makeText(getApplicationContext(), msg , Toast.LENGTH_SHORT).show();
+
+                    }
+                })
+                .show();
     }
 
 
